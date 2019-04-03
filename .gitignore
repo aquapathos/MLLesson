@@ -77,3 +77,19 @@ ML01 クラスタリング/.ipynb_checkpoints/IRIS00-checkpoint.ipynb
 
 ML02 決定木の学習/.ipynb_checkpoints/DecisionTreeoFaceFeatures-checkpoint.ipynb
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+package-lock.json
+*~
+*.swp
+.vscode
+*.log
+node_modules/
+train
+test
+
+ML08 一般物体認識/OpenCampus Demo/pysrc/modeldata/*
