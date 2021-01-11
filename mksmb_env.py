@@ -107,7 +107,7 @@ class SMBWrapper(gym.Wrapper):
         noop_max: int = 30,
         frame_skip: int = 4,
         screen_sizeH: int = 116,
-        screen_sizeW: int = 124 
+        screen_sizeW: int = 124, 
         terminal_on_life_loss: bool = True,
         clip_reward: bool = True,
     ):
