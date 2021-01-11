@@ -7,11 +7,11 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.common.vec_env import DummyVecEnv,SubprocVecEnv,VecFrameStack,VecEnv
 from typing import List,Optional,Tuple,Union,Any, Callable, Dict,Type, Union
-import wandb
 import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
 import numpy as np,gym
 import os
+import wandb
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT,COMPLEX_MOVEMENT,RIGHT_ONLY
 
 def Joy(env_id = 'SuperMarioBros-v0',movement=COMPLEX_MOVEMENT):
@@ -29,11 +29,11 @@ class SMBMonitor(Monitor):
         usewandb=False,
         **kwargs
     ):
-        super(SMBMonitor,self).__init__(env=env,**kwargs)
+        super().__init__(env=env,**kwargs)
         self.usewandb = usewandb
     
     def step(self, action: Union[np.ndarray, int]) -> GymStepReturn:
-        observation, reward, done, info = super(SMBMonitor,self).step(action)
+        observation, reward, done, info = super().step(action)
         info_keywords=('coins','score','time','x_pos')
         if done and self.usewandb:
           wandbinfo = info["episode"]
@@ -66,6 +66,26 @@ class SMEpisodicLifeEnv(EpisodicLifeEnv):
             self.lives = self.env.unwrapped._life
         return obs
 
+class RewardWraper(gym.Wrapper):
+    def __init__(
+        self,
+        env: gym.Env
+    ):
+        super().__init__(env=env)
+        self.myconins = 0
+
+    def reset(self,**kargs):
+        self.mycoins = 0 
+        return self.env.reset(**kargs)
+
+    def step(self, action: Union[np.ndarray, int]):
+        observation, reward, done, info = self.env.step(action)
+        coins = info['coins']
+        if self.mycoins < coins:
+            reward += 1
+            self.mycoins = coins
+        return observation, reward, done, info
+  
 class SMBWrapper(gym.Wrapper):
     def __init__(
         self,
@@ -83,10 +103,11 @@ class SMBWrapper(gym.Wrapper):
         if "FIRE" in env.unwrapped.get_action_meanings():
             env = FireResetEnv(env)
         env = WarpFrame(env, width=screen_size, height=screen_size)
+        env = RewardWraper(env)
         if clip_reward:
             env = ClipRewardEnv(env)
 
-        super(SMBWrapper, self).__init__(env)
+        super().__init__(env)
 
 def make_mario_env(
     env_id: Union[str, Type[gym.Env]],
@@ -173,7 +194,7 @@ from stable_baselines3.common.results_plotter import load_results, ts2xy
 
 class recordModelCallback(BaseCallback):
     def __init__(self, check_freq: int, log_dir: str, verbose=1, usewandb=False):
-        super(recordModelCallback, self).__init__(verbose)
+        super().__init__(verbose)
         self.check_freq = check_freq
         self.log_dir = log_dir
         self.save_path = os.path.join(log_dir, 'best_model')
