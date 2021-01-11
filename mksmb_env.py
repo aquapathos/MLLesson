@@ -7,6 +7,7 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.common.vec_env import DummyVecEnv,SubprocVecEnv,VecFrameStack,VecEnv
 from typing import List,Optional,Tuple,Union,Any, Callable, Dict,Type, Union
+import wandb
 import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
 import numpy as np,gym
