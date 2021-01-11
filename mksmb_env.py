@@ -1,24 +1,34 @@
 
-from stable_baselines3.common.env_util import make_atari_env,make_vec_env
+from stable_baselines3.common.env_util import make_atari_env,make_vec_env , make_vec_env #, AtariWrapper
+from stable_baselines3.common.atari_wrappers import EpisodicLifeEnv,NoopResetEnv,MaxAndSkipEnv
+from stable_baselines3.common.atari_wrappers import FireResetEnv,WarpFrame,ClipRewardEnv
 from stable_baselines3.common.type_aliases import GymObs, GymStepReturn
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv,SubprocVecEnv,VecFrameStack,VecEnv
+from typing import List,Optional,Tuple,Union,Any, Callable, Dict,Type
+import gym_super_mario_bros
+from nes_py.wrappers import JoypadSpace
+import numpy as np,gym
+import os
+from gym_super_mario_bros.actions import SIMPLE_MOVEMENT,COMPLEX_MOVEMENT,RIGHT_ONLY
 
-def Joy(env_id = 'SuperMarioBros-v0'):
-  env = gym_super_mario_bros.make(env_id)
-  env = JoypadSpace(env, COMPLEX_MOVEMENT)
-  return env
+def Joy(env_id = 'SuperMarioBros-v0',movement=COMPLEX_MOVEMENT):
+  def Joyenv():
+    env = gym_super_mario_bros.make(env_id)
+    env = JoypadSpace(env, movement)
+    return env
+  return Joyenv
 
 class SMBMonitor(Monitor):
+    
     def __init__(
         self,
         env,
         usewandb=False,
         **kwargs
     ):
-        super(SMBMonitor,self).__init__(env,**kwargs)
+        super(SMBMonitor,self).__init__(env=env,**kwargs)
         self.usewandb = usewandb
-        print(usewandb)
     
     def step(self, action: Union[np.ndarray, int]) -> GymStepReturn:
         observation, reward, done, info = super(SMBMonitor,self).step(action)
@@ -88,6 +98,7 @@ def make_mario_env(
     vec_env_kwargs: Optional[Dict[str, Any]] = None,
     monitor_kwargs: Optional[Dict[str, Any]] = None, #-> Colab版にはない
 ) -> VecEnv:
+
     if wrapper_kwargs is None:
         wrapper_kwargs = {}
 
