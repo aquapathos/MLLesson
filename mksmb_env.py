@@ -1,16 +1,17 @@
 
 from stable_baselines3.common.env_util import make_atari_env,make_vec_env , make_vec_env #, AtariWrapper
 from stable_baselines3.common.atari_wrappers import EpisodicLifeEnv,NoopResetEnv,MaxAndSkipEnv
-from stable_baselines3.common.atari_wrappers import FireResetEnv,WarpFrame,ClipRewardEnv
+from stable_baselines3.common.atari_wrappers import FireResetEnv,ClipRewardEnv # WarpFrame,
 from stable_baselines3.common.type_aliases import GymObs, GymStepReturn
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.common.vec_env import DummyVecEnv,SubprocVecEnv,VecFrameStack,VecEnv
 from typing import List,Optional,Tuple,Union,Any, Callable, Dict,Type, Union
 import gym_super_mario_bros
+from gym import spaces
 from nes_py.wrappers import JoypadSpace
 import numpy as np,gym
-import os
+import os, cv2
 import wandb
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT,COMPLEX_MOVEMENT,RIGHT_ONLY
 
@@ -66,6 +67,19 @@ class SMEpisodicLifeEnv(EpisodicLifeEnv):
             self.lives = self.env.unwrapped._life
         return obs
 
+class WarpFrame(gym.ObservationWrapper):
+    def __init__(self, env: gym.Env, width: int = 84, height: int = 84):
+        gym.ObservationWrapper.__init__(self, env)
+        self.width = width
+        self.height = height
+        self.observation_space = spaces.Box(
+            low=0, high=255, shape=(self.height, self.width, 1), dtype=env.observation_space.dtype
+        )
+    def observation(self, frame: np.ndarray) -> np.ndarray:
+        frame = cv2.cvtColor(frame[4:236,4:252,:], cv2.COLOR_RGB2GRAY)
+        frame = cv2.resize(frame, (self.width, self.height), interpolation=cv2.INTER_AREA)
+        return frame[:, :, None] 
+    
 class RewardWraper(gym.Wrapper):
     def __init__(
         self,
@@ -92,7 +106,8 @@ class SMBWrapper(gym.Wrapper):
         env: gym.Env,
         noop_max: int = 30,
         frame_skip: int = 4,
-        screen_size: int = 84,
+        screen_sizeH: int = 116,
+        screen_sizeW: int = 124 
         terminal_on_life_loss: bool = True,
         clip_reward: bool = True,
     ):
@@ -100,9 +115,7 @@ class SMBWrapper(gym.Wrapper):
         env = MaxAndSkipEnv(env, skip=frame_skip)
         if terminal_on_life_loss:
             env = SMEpisodicLifeEnv(env)
-        if "FIRE" in env.unwrapped.get_action_meanings():
-            env = FireResetEnv(env)
-        env = WarpFrame(env, width=screen_size, height=screen_size)
+        env = WarpFrame(env, width=screen_sizeW, height=screen_sizeH)
         env = RewardWraper(env)
         if clip_reward:
             env = ClipRewardEnv(env)
