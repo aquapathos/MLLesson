@@ -5,7 +5,7 @@ from stable_baselines3.common.atari_wrappers import FireResetEnv,WarpFrame,ClipR
 from stable_baselines3.common.type_aliases import GymObs, GymStepReturn
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv,SubprocVecEnv,VecFrameStack,VecEnv
-from typing import List,Optional,Tuple,Union,Any, Callable, Dict,Type
+from typing import List,Optional,Tuple,Union,Any, Callable, Dict,Type, Union
 import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
 import numpy as np,gym
