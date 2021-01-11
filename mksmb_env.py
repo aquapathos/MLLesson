@@ -4,6 +4,7 @@ from stable_baselines3.common.atari_wrappers import EpisodicLifeEnv,NoopResetEnv
 from stable_baselines3.common.atari_wrappers import FireResetEnv,WarpFrame,ClipRewardEnv
 from stable_baselines3.common.type_aliases import GymObs, GymStepReturn
 from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.common.vec_env import DummyVecEnv,SubprocVecEnv,VecFrameStack,VecEnv
 from typing import List,Optional,Tuple,Union,Any, Callable, Dict,Type, Union
 import gym_super_mario_bros
@@ -171,7 +172,7 @@ from stable_baselines3.common.results_plotter import load_results, ts2xy
 
 class recordModelCallback(BaseCallback):
     def __init__(self, check_freq: int, log_dir: str, verbose=1, usewandb=False):
-        super(TensorboardCallback, self).__init__(verbose)
+        super(recordModelCallback, self).__init__(verbose)
         self.check_freq = check_freq
         self.log_dir = log_dir
         self.save_path = os.path.join(log_dir, 'best_model')
